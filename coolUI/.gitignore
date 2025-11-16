@@ -11,6 +11,7 @@ node_modules
 node_moduless
 dist
 dist-ssr
+main2.ts
 *.local
 
 # Editor directories and files

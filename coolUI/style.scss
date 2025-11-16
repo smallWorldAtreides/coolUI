@@ -33,7 +33,7 @@ html, body {
   --color4: 190, 80, 138;
   --color5: 30, 112, 168;
   --color-interactive: 90, 160, 255;
-  --circle-size: 80%;
+  --circle-size: 60%;
   --blending: screen;
 }
 
@@ -120,7 +120,6 @@ html, body {
   animation: innerMove 4s ease-in-out infinite;
 }
 
-/* Kollisionseffekt */
 .g1.active::before, .g2.active::before, .g3.active::before, .g4.active::before, .g5.active::before {
   animation: innerMove 0.5s ease-in-out infinite, innerPulse 10s ease-in-out infinite;
   transform: scale(5); 
@@ -130,7 +129,7 @@ html, body {
 .gradient-bg {
   width: 100vw;
   height: 100vh;
-  position: relative;
+  position: fixed;
   overflow: hidden;
   background: linear-gradient(40deg, var(--color-bg1), var(--color-bg2));
   top: 0;
@@ -154,7 +153,7 @@ html, body {
 
   .g1 {
     position: absolute;
-    background: radial-gradient(circle at center, rgba(var(--color1), 0.8) 0, rgba(var(--color1), 0) 50%) no-repeat;
+    background: radial-gradient(circle at center, rgba(var(--color1), 0.8) 0, rgba(var(--color3), 0) 50%) no-repeat;
     mix-blend-mode: var(--blending); 
 
     width: var(--circle-size);
@@ -184,7 +183,7 @@ html, body {
 
   .g2 {
     position: absolute;
-    background: radial-gradient(circle at center, rgba(var(--color2), 0.8) 0, rgba(var(--color2), 0) 50%) no-repeat;
+    background: radial-gradient(circle at center, rgba(var(--color-interactive), 0.8) 0, rgba(var(--color3), 0) 50%) no-repeat;
     mix-blend-mode: screen;
 
     width: var(--circle-size);
@@ -201,7 +200,7 @@ html, body {
     content: "";
     position: absolute;
     width: 60%;
-    height: 60%;
+    height: 70%;
     top: 20%;
     left: 20%;
     background: radial-gradient(circle at center, rgba(var(--color1), 1) 0, rgba(var(--color5), 0) 60%);
@@ -283,11 +282,24 @@ html, body {
     animation: moveInCircle 20s ease infinite;
 
     opacity: 1;
+
+     &::before {
+    content: "";
+    position: absolute;
+    width: 60%;
+    height: 60%;
+    top: 20%;
+    left: 20%;
+    background: radial-gradient(circle at center, rgba(var(--color3), 1) 0, rgba(var(--color-bg1), 0) 60%);
+    border-radius: 50%;
+    animation: innerPulse 2s ease-in-out infinite, innerMove 4s ease-in-out infinite;
+    mix-blend-mode: inherit;
+  }
   }
 
   .interactive {
     position: absolute;
-    background: radial-gradient(circle at center, rgba(var(--color-interactive), 0.65) 0, rgba(var(--color1), 0) 52%) no-repeat;
+    background: radial-gradient(circle at center, rgba(var(--color-interactive), 0.69) 0, rgba(var(--color3), 0) 45%) no-repeat;
     mix-blend-mode: color-burn ;
 
     width: 50%;
@@ -297,7 +309,7 @@ html, body {
 
     opacity: 0.8;
   }
-  /* Alle Bubbles pulsieren/fließen wie die interaktive Bubble */
+
 .g1::before, .g2::before, .g3::before, .g4::before, .g5::before {
   animation: innerMove 8s ease-in-out infinite, innerPulse 4s ease-in-out infinite;
 }
@@ -307,10 +319,10 @@ html, body {
   animation-timing-function: ease-in-out;
 }
 
-/* Optional: kleine Phasenverschiebung damit nicht alle synchron pulsieren */
+
 .g1::before { animation-delay: 0s; }
-.g2::before { animation-delay: 1s; }
-.g3::before { animation-delay: 2s; }
-.g4::before { animation-delay: 3s; }
-.g5::before { animation-delay: 4s; }
+.g2::before { animation-delay: 1.2s; }
+.g3::before { animation-delay: 2.4s; }
+.g4::before { animation-delay: 3.6s; }
+.g5::before { animation-delay: 4.8s; }
 }
