@@ -13,8 +13,12 @@
   </head>
   <body>
   <div class="text-container">
-    <h1></h1>
+    <h1>morph.</h1>
+    <div class="content">
+      <p>click</p>
+    </div>
   </div>
+  
   <div class="gradient-bg">
     <svg xmlns="http://www.w3.org/2000/svg">
       <defs>
@@ -22,7 +26,9 @@
           <feGaussianBlur in="SourceGraphic" stdDeviation="15 35" result="blur" />
           <feColorMatrix in="blur" mode="matrix" values="1 0 0 0 0  0 1 0 0 0  0 0 1 0 0  0 0 0 400 -180" result="goo" />
           <feBlend in="SourceGraphic" in2="goo" />
+          <feDropShadow dx="0" dy="0" stdDeviation="900" flood-color="rgba(0,0,0,0.5)"/>
         </filter>
+
       </defs>
     </svg>
     <div class="gradients-container">

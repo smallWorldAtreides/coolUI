@@ -32,7 +32,7 @@ html, body {
   --color3: 133, 50, 251;
   --color4: 190, 80, 138;
   --color5: 30, 112, 168;
-  --color-interactive: 200, 50, 227;
+  --color-interactive: 90, 160, 255;
   --circle-size: 80%;
   --blending: screen;
 }
@@ -77,25 +77,25 @@ html, body {
 
 @keyframes moveVertical {
   0% {
-    transform: translateY(-50%);
+    transform: translateY(50%);
   }
   50% {
-    transform: translateY(20%);
+    transform: translateY(-20%);
   }
   100% {
-    transform: translateY(-50%);
+    transform: translateY(50%);
   }
 }
 
 @keyframes moveHorizontal {
   0% {
-    transform: translateX(-50%) translateY(-10%);
+    transform: translateX(-50%) translateY(10%);
   }
   50% {
-    transform: translateX(20%) translateY(10%);
+    transform: translateX(20%) translateY(-10%);
   }
   100% {
-    transform: translateX(-50%) translateY(-10%);
+    transform: translateX(-50%) translateY(10%);
   }
   
 }
@@ -122,8 +122,8 @@ html, body {
 
 /* Kollisionseffekt */
 .g1.active::before, .g2.active::before, .g3.active::before, .g4.active::before, .g5.active::before {
-  animation: innerMove 0.5s ease-in-out infinite, innerPulse 1s ease-in-out infinite;
-  transform: scale(5); /* optional: größer bei Berührung */
+  animation: innerMove 0.5s ease-in-out infinite, innerPulse 10s ease-in-out infinite;
+  transform: scale(5); 
 }
 
 
@@ -146,7 +146,7 @@ html, body {
 
 
   .gradients-container {
-    filter: url(#goo) blur(2px) brightness(1.7);
+    filter: url(#goo) blur(5px) brightness(1.7);
     ;
     width: 100%;
     height: 100%;
@@ -287,8 +287,8 @@ html, body {
 
   .interactive {
     position: absolute;
-    background: radial-gradient(circle at center, rgba(var(--color2), 0.75) 0, rgba(var(--color1), 0) 52%) no-repeat;
-    mix-blend-mode: color-dodge;
+    background: radial-gradient(circle at center, rgba(var(--color-interactive), 0.65) 0, rgba(var(--color1), 0) 52%) no-repeat;
+    mix-blend-mode: color-burn ;
 
     width: 50%;
     height: 50%;
@@ -297,4 +297,20 @@ html, body {
 
     opacity: 0.8;
   }
+  /* Alle Bubbles pulsieren/fließen wie die interaktive Bubble */
+.g1::before, .g2::before, .g3::before, .g4::before, .g5::before {
+  animation: innerMove 8s ease-in-out infinite, innerPulse 4s ease-in-out infinite;
+}
+
+/* Wobble für den Goo-Look */
+.g1, .g2, .g3, .g4, .g5 {
+  animation-timing-function: ease-in-out;
+}
+
+/* Optional: kleine Phasenverschiebung damit nicht alle synchron pulsieren */
+.g1::before { animation-delay: 0s; }
+.g2::before { animation-delay: 1s; }
+.g3::before { animation-delay: 2s; }
+.g4::before { animation-delay: 3s; }
+.g5::before { animation-delay: 4s; }
 }
