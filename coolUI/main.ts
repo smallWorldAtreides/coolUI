@@ -3,6 +3,13 @@ import './style.scss';
 document.addEventListener('DOMContentLoaded', () => {
   const interBubble = document.querySelector<HTMLDivElement>('.interactive')!;
   const fileInput = document.getElementById('audioUpload') as HTMLInputElement | null;
+  
+  // Audio control elements
+  const playPauseBtn = document.getElementById('playPauseBtn') as HTMLButtonElement;
+  const muteBtn = document.getElementById('muteBtn') as HTMLButtonElement;
+  const volumeSlider = document.getElementById('volumeSlider') as HTMLInputElement;
+  const progressBar = document.querySelector('.progress') as HTMLDivElement;
+  const progressContainer = document.querySelector('.progress-container') as HTMLDivElement;
   // Add this after your existing code in the DOMContentLoaded event listener
 const audioBubble = document.createElement('div');
 audioBubble.className = 'audio-bubble';
@@ -43,8 +50,120 @@ document.head.appendChild(style);
   const dataArray = new Uint8Array(bufferLength);
 
   let audio = new Audio();
+  audio.volume = parseFloat(volumeSlider.value);
   let source: MediaElementAudioSourceNode | null = null;
   let audioLoaded = false;
+  let isPlaying = false;
+  let currentTrackIndex = 0;
+  const tracks: string[] = []; // Will store loaded track URLs
+  
+  // Update progress bar
+  function updateProgress() {
+    if (!audioLoaded) return;
+    
+    const { duration, currentTime } = audio;
+    const progressPercent = (currentTime / duration) * 100;
+    progressBar.style.width = `${progressPercent}%`;
+  }
+  
+  // Set progress when clicking on progress bar
+  function setProgress(e: MouseEvent) {
+    if (!audioLoaded) return;
+    
+    const width = (e.currentTarget as HTMLDivElement).clientWidth;
+    const clickX = e.offsetX;
+    const duration = audio.duration;
+    audio.currentTime = (clickX / width) * duration;
+  }
+  
+  // Play/pause toggle
+  function togglePlay() {
+    if (!audioLoaded) return;
+    
+    if (audio.paused) {
+      audio.play();
+      isPlaying = true;
+      playPauseBtn.classList.add('playing');
+      playPauseBtn.setAttribute('title', 'Pause');
+    } else {
+      audio.pause();
+      isPlaying = false;
+      playPauseBtn.classList.remove('playing');
+      playPauseBtn.setAttribute('title', 'Play');
+    }
+  }
+  
+  // Update volume
+  function setVolume() {
+    const volume = parseFloat(volumeSlider.value);
+    audio.volume = volume;
+    
+    // Update mute button state
+    if (volume === 0) {
+      muteBtn.classList.add('muted');
+      muteBtn.setAttribute('title', 'Unmute');
+    } else {
+      muteBtn.classList.remove('muted');
+      muteBtn.setAttribute('title', 'Mute');
+    }
+  }
+  
+  // Toggle mute
+  function toggleMute() {
+    if (audio.volume > 0) {
+      audio.volume = 0;
+      volumeSlider.value = '0';
+      muteBtn.classList.add('muted');
+      muteBtn.setAttribute('title', 'Unmute');
+    } else {
+      audio.volume = parseFloat(volumeSlider.value) || 0.7;
+      muteBtn.classList.remove('muted');
+      muteBtn.setAttribute('title', 'Mute');
+    }
+  }
+  
+  // Load and play track
+  function loadTrack(trackIndex: number) {
+    if (tracks.length === 0) return;
+    
+    currentTrackIndex = (trackIndex + tracks.length) % tracks.length;
+    const trackUrl = tracks[currentTrackIndex];
+    
+    audio.src = trackUrl;
+    
+    // If audio was playing, continue playing the new track
+    if (isPlaying) {
+      audio.play().catch(e => console.error('Playback failed:', e));
+    }
+  }
+  
+  // Event listeners for controls
+  playPauseBtn.addEventListener('click', togglePlay);
+  muteBtn.addEventListener('click', toggleMute);
+  volumeSlider.addEventListener('input', setVolume);
+  progressContainer.addEventListener('click', setProgress);
+  
+  // Update progress bar
+  audio.addEventListener('timeupdate', updateProgress);
+  
+  // When audio ends, stop and reset
+  audio.addEventListener('ended', () => {
+    isPlaying = false;
+    playPauseBtn.classList.remove('playing');
+  });
+  
+  // Update play/pause button state when audio is paused/played by the browser
+  audio.addEventListener('play', () => {
+    isPlaying = true;
+    playPauseBtn.classList.add('playing');
+    playPauseBtn.setAttribute('title', 'Pause');
+  });
+  
+  audio.addEventListener('pause', () => {
+    isPlaying = false;
+    playPauseBtn.classList.remove('playing');
+    playPauseBtn.setAttribute('title', 'Play');
+  });
 
   function ensureAudioSource() {
     if (!source && audio.src) {
@@ -66,6 +185,25 @@ document.head.appendChild(style);
 
   if (fileInput) {
     fileInput.addEventListener('change', () => {
+      // Clear previous tracks
+      tracks.length = 0;
+      
+      const files = fileInput.files;
+      if (!files || files.length === 0) return;
+      
+      // Add all selected files to tracks array
+      for (let i = 0; i < files.length; i++) {
+        tracks.push(URL.createObjectURL(files[i]));
+      }
+      
+      // Load and play the first track
+      loadTrack(0);
+      
+      // Auto-play if not on mobile (where autoplay is often blocked)
+      const isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
+      if (!isMobile) {
+        audio.play().catch(e => console.log('Autoplay prevented:', e));
+      }
       const file = fileInput.files?.[0];
       if (!file) return;
       const url = URL.createObjectURL(file);

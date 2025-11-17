@@ -95,7 +95,7 @@ html, body {
     transform: translateX(20%) translateY(-10%);
   }
   100% {
-    transform: translateX(50%) translateY(10%);
+    transform: translateX(75%) translateY(23%);
   }
   
 }
@@ -118,13 +118,193 @@ html, body {
 
 .g1::before, .g2::before, .g3::before, .g4::before, .g5::before {
   animation: innerMove 4s ease-in-out infinite;
+  filter: drop-shadow(0px 0px 10px rgb(12, 133, 170));
 }
 
 .g1.active::before, .g2.active::before, .g3.active::before, .g4.active::before, .g5.active::before {
   animation: innerMove 0.5s ease-in-out infinite, innerPulse 10s ease-in-out infinite;
   transform: scale(5); 
+  
 }
 
+
+/* Audio Controls Styling */
+.audio-controls {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  background: rgba(0, 0, 0, 0.7);
+  backdrop-filter: blur(10px);
+  padding: 8px 15px;
+  z-index: 1000;
+  box-shadow: 0 -2px 10px rgba(0, 0, 0, 0.3);
+  height: 50px;
+  box-sizing: border-box;
+}
+
+.controls-wrapper {
+  display: flex;
+  align-items: center;
+  height: 100%;
+  gap: 12px;
+}
+
+/* Play/Pause Button */
+#playPauseBtn {
+  width: 34px;
+  height: 34px;
+  border: none;
+  border-radius: 50%;
+  background: rgba(80, 231, 236, 0.9) !important;
+  cursor: pointer;
+  position: relative;
+  flex-shrink: 0;
+  transition: transform 0.2s, background 0.2s;
+}
+
+#playPauseBtn::before {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 0;
+  height: 0;
+  border-style: solid;
+  border-width: 7px 0 7px 12px;
+  border-color: transparent transparent transparent white;
+  margin-left: 2px;
+}
+
+#playPauseBtn.playing::before {
+  width: 4px;
+  height: 14px;
+  border: none;
+  background: white;
+  box-shadow: 7px 0 0 white;
+  margin-left: 0;
+}
+
+#playPauseBtn:hover {
+  transform: scale(1.1);
+}
+
+#playPauseBtn:active {
+  transform: scale(0.95);
+}
+
+/* Progress Bar */
+.progress-container {
+  flex-grow: 1;
+  height: 4px;
+  background: rgba(255, 255, 255, 0.2);
+  border-radius: 2px;
+  cursor: pointer;
+  transition: height 0.2s;
+  position: relative;
+  mix-blend-mode: screen;
+}
+
+.progress-container:hover {
+  height: 6px;
+}
+
+.progress-bar {
+  height: 100%;
+  width: 100%;
+  position: relative;
+  overflow: hidden;
+  border-radius: 2px;
+}
+
+.progress {
+  height: 100%;
+  background: linear-gradient(90deg, #43bbf3, #e100ff);
+  width: 0%;
+  transition: width 0.1s linear;
+  position: relative;
+}
+
+/* Volume Controls */
+.volume-container {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  width: 100px;
+  flex-shrink: 0;
+}
+
+#muteBtn {
+  width: 15px;
+  height: 15px;
+  border: none;
+  background: none;
+  cursor: pointer;
+  position: relative;
+  padding: 0;
+  flex-shrink: 0;
+}
+
+#muteBtn::before {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 18px;
+  height: 14px;
+  background: white;
+  clip-path: path('M11,5 L6,9 L2,9 L2,15 L6,15 L11,19 L11,5 Z M15.54,8.46 C16.4774,9.39726 17.0039,10.6694 17.0039,12 C17.0039,13.3306 16.4774,14.6027 15.54,15.54 M19,12 C19,10.22 18.47,8.55 17.5,7.17 L15,9.67 L15,14.34 L17.5,16.84 C18.5,15.5 19,13.8 19,12 Z');
+}
+
+#muteBtn.muted::before {
+  background: #ff3eef;
+}
+
+#volumeSlider {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 100%;
+  height: 4px;
+  background: rgba(255, 255, 255, 0.3);
+  border-radius: 2px;
+  outline: none;
+  transition: all 0.2s;
+  margin: 0;
+  padding: 0;
+}
+
+#volumeSlider:hover {
+  height: 6px;
+}
+
+#volumeSlider::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: white;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+#volumeSlider::-moz-range-thumb {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: white;
+  cursor: pointer;
+  border: none;
+  transition: all 0.2s;
+}
+
+#volumeSlider::-webkit-slider-thumb:hover,
+#volumeSlider::-moz-range-thumb:hover {
+  transform: scale(1.5);
+  background: #ff7b00;
+}
 
 .gradient-bg {
   width: 100vw;
@@ -134,6 +314,8 @@ html, body {
   background: linear-gradient(40deg, var(--color-bg1), var(--color-bg2));
   top: 0;
   left: 0;
+  filter: sepia(0.35) brightness(0.74) contrast(1.9), noise(10px);
+
 
   svg {
     position: fixed;
@@ -158,11 +340,13 @@ html, body {
 
     width: var(--circle-size);
     height: var(--circle-size);
-    top: calc(50% - var(--circle-size) / 2);
-    left: calc(50% - var(--circle-size) / 2);
+    top: calc(53% - var(--circle-size) / 2);
+    left: calc(63% - var(--circle-size) / 2);
 
-    transform-origin: center center;
-    animation: moveVertical 20s ease infinite;
+    animation-delay: 4.3s;
+
+    transform-origin: calc(50% + 230px);
+    animation: moveVertical 3.3s ease infinite, moveHorizontal 6s ease infinite, moveInCircle 40s ease infinite;
 
     opacity: 1;
 
@@ -175,7 +359,7 @@ html, body {
         left: 20%;
         background: radial-gradient(circle at center, rgba(var(--color3), 1) 0, rgba(var(--color5), 0) 60%);
         border-radius: 50%;
-        animation: innerPulse 3s ease-in-out infinite, innerMove 4s ease-in-out infinite;
+        animation: innerPulse 3s ease-in-out infinite, innerMove 1.7s ease-in-out infinite;
         mix-blend-mode: inherit;
   }
 
@@ -250,7 +434,7 @@ html, body {
     left: calc(50% - var(--circle-size) / 2);
 
     transform-origin: calc(50% - 200px);
-    animation: moveHorizontal 40s ease infinite;
+    animation: moveHorizontal 1s ease infinite, moveVertical 13s ease infinite;
 
     opacity: 0.7;
 
@@ -278,7 +462,7 @@ html, body {
     top: calc(50% - var(--circle-size));
     left: calc(50% - var(--circle-size));
 
-    transform-origin: calc(50% - 800px) calc(50% + 200px);
+    transform-origin: calc(50% - 900px) calc(50% + 200px);
     animation: moveInCircle 15s ease infinite;
 
     opacity: 1;
@@ -292,7 +476,7 @@ html, body {
     left: 20%;
     background: radial-gradient(circle at center, rgba(var(--color2), 1) 0, rgba(var(--color-bg1), 0) 60%);
     border-radius: 50%;
-    animation: innerPulse 2s ease-in-out infinite, innerMove 4s ease-in-out infinite;
+    animation: innerPulse 1s ease-in-out infinite, innerMove 2s ease-in-out infinite;
     mix-blend-mode: inherit;
   }
   }
