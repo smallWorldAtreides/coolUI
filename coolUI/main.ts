@@ -144,11 +144,11 @@ function move() {
   }
 
   const { bass, mids, highs } = getFreqBands();
-    const nbass = clamp01(bass / 140);  // Normalize to 0-1 range
+    const nbass = clamp01(bass / 255) * 3;  // Normalize to 0-1 range
     const nmids = clamp01(mids / 255) * 0.02;
     const nhighs = clamp01(highs / 255) * 0.5; // Reduced high frequency sensitivity
 
-    const bassScale = 1 + (nbass * 4); // Scale from 1x to 3x based on bass
+    const bassScale = 1 + (nbass * 2); // Scale from 1x to 3x based on bass
     const midMovement = nmids * 200; // Movement range based on mids
     const highPulse = 0.4 + (nhighs * 0.7); 
 
