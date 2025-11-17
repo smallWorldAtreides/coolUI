@@ -2,17 +2,43 @@ import './style.scss';
 
 document.addEventListener('DOMContentLoaded', () => {
   const interBubble = document.querySelector<HTMLDivElement>('.interactive')!;
-  const bubbles = Array.from(document.querySelectorAll<HTMLDivElement>('.g1, .g2, .g3, .g4, .g5'));
   const fileInput = document.getElementById('audioUpload') as HTMLInputElement | null;
+  // Add this after your existing code in the DOMContentLoaded event listener
+const audioBubble = document.createElement('div');
+audioBubble.className = 'audio-bubble';
+document.querySelector('.gradients-container')?.appendChild(audioBubble);
 
-  let curX = 0, curY = 0;
+// Add this CSS for the audio bubble
+const style = document.createElement('style');
+style.textContent = `
+  .audio-bubble {
+    position: absolute;
+    width: 60%;
+    height: 60%;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    background: radial-gradient(
+      circle at center,
+      rgba(255, 100, 255, 0.38) 0%,
+      rgba(200, 50, 200, 0.03) 70%
+    );
+    border-radius: 50%;
+    mix-blend-mode: screen;
+    pointer-events: none;
+    will-change: transform, opacity;
+  }
+`;
+document.head.appendChild(style);
+  
+  let curX = 0, curY = 0, startTime = 0;
   let tgX = 0, tgY = 0;
   let wobbleAngle = 0;
 
   // --- Audio setup ---
   const audioContext = new (window.AudioContext || (window as any).webkitAudioContext)();
   const analyser = audioContext.createAnalyser();
-  analyser.fftSize = 256;
+  analyser.fftSize = 2048;
   const bufferLength = analyser.frequencyBinCount;
   const dataArray = new Uint8Array(bufferLength);
 
@@ -52,9 +78,9 @@ document.addEventListener('DOMContentLoaded', () => {
 
   function getFreqBands() {
     analyser.getByteFrequencyData(dataArray);
-    const bass = average(dataArray.slice(12,45));
-    const mids = average(dataArray.slice(50, 70));
-    const highs = average(dataArray.slice(80, Math.min(120, dataArray.length)));
+    const bass = average(dataArray.slice(50,51));
+    const mids = average(dataArray.slice(300, 500));
+    const highs = average(dataArray.slice(18, 200));
     return { bass, mids, highs };
   }
 
@@ -69,50 +95,121 @@ document.addEventListener('DOMContentLoaded', () => {
     return Math.max(0, Math.min(1, v));
   }
 
-  function move() {
-    const { bass, mids, highs } = getFreqBands();
-    const nbass = clamp01(bass / 255);
-    const nmids = clamp01(mids / 255);
-    const nhighs = clamp01(highs / 255);
-
-    // Interaktive Bubble flüssig bewegen
-    curX += (tgX - curX) / 15;
-    curY += (tgY - curY) / 15;
-
-    wobbleAngle += 0.12;
-    const wobbleX = 1 + Math.sin(wobbleAngle * 0.9) * 0.12 + nbass * 2;
-    const wobbleY = 1 + Math.cos(wobbleAngle * 0.7) * 0.08 + nbass * 1.8;
-
-    interBubble.style.transform = `translate(${Math.round(curX)}px, ${Math.round(curY)}px) scale(${wobbleX.toFixed(3)}, ${wobbleY.toFixed(3)})`;
-
-    // Alle anderen Bubbles
-    bubbles.forEach((b, i) => {
-      const rect = b.getBoundingClientRect();
-      const interRect = interBubble.getBoundingClientRect();
-
-      // --- Frequenzband pro Bubble ---
-      let bandValue = 0;
-      if (b === 0) bandValue = nbass;
-      else if (b === 1) bandValue = nmids;
-      else if (b === 2) bandValue = nhighs;
-      else bandValue = (nbass + nmids + nhighs) / 3;
-
-      const basePulse = 0.8 + bandValue * 2 + Math.sin(wobbleAngle * 0.7 + i) * 0.2; // kleiner starten, stärker reagieren
-
-      let pullX = 0;
-      let pullY = 0;
-      let finalScale = basePulse*1.7;
-
-      b.style.transform = `translate(${pullX.toFixed(2)}px, ${pullY.toFixed(2)}px) scale(${finalScale.toFixed(3)})`;
-    });
-
-    requestAnimationFrame(move);
-  }
-
   window.addEventListener('mousemove', (e) => {
     tgX = e.clientX;
     tgY = e.clientY;
   });
+
+
+function createSmallBubbles(count: number) {
+  const container = document.querySelector('.gradient-bg');
+  if (!container) return [];
+
+  const bubbles = [];
+  for (let i = 0; i < count; i++) {
+    const bubble = document.createElement('div');
+    bubble.className = 'small-bubble';
+    
+    // Random position and size
+    const size = 2 + Math.random() * 3;
+    const x = Math.random() * 100;
+    const y = Math.random() * 100;
+    const angle = Math.random() * Math.PI * 2;
+    const speed = 0.2 + Math.random() * 0.3;
+    
+    bubble.style.width = `${size}px`;
+    bubble.style.height = `${size}px`;
+    bubble.style.left = `${x}%`;
+    bubble.style.top = `${y}%`;
+    bubble.style.opacity = (0.3 + Math.random() * 0.7).toString();
+    
+    container.appendChild(bubble);
+    
+    bubbles.push({
+      element: bubble,
+      x,
+      y,
+      speed,
+      angle,
+      size
+    });
+  }
+  return bubbles;
+}
+
+function move() {
+  if (!audioLoaded) {
+    requestAnimationFrame(move);
+    return;
+  }
+
+  const { bass, mids, highs } = getFreqBands();
+    const nbass = clamp01(bass / 140);  // Normalize to 0-1 range
+    const nmids = clamp01(mids / 255) * 0.02;
+    const nhighs = clamp01(highs / 255) * 0.5; // Reduced high frequency sensitivity
+
+    const bassScale = 1 + (nbass * 4); // Scale from 1x to 3x based on bass
+    const midMovement = nmids * 200; // Movement range based on mids
+    const highPulse = 0.4 + (nhighs * 0.7); 
+
+    const time = performance.now() * 0.001;
+    const moveX = Math.sin(time) * midMovement;
+    const moveY = Math.cos(time * 0.7) * (midMovement * 0.7);
+
+    audioBubble.style.transform = `
+      translate(calc(-50% + ${moveX}px), calc(-50% + ${moveY}px))
+      scale(${bassScale})
+    `;
+    audioBubble.style.opacity = highPulse.toString();    
+      // Move interactive bubble
+      curX += (tgX - curX) / 15;
+      curY += (tgY - curY) / 15;
+      wobbleAngle += 0.12;
+      const wobbleX = 1 + Math.sin(wobbleAngle * 0.9) * 0.12 + nbass * 4;
+      const wobbleY = 1 + Math.cos(wobbleAngle * 0.7) * 0.08 + nbass * 3;
+      interBubble.style.transform = `translate(${Math.round(curX)}px, ${Math.round(curY)}px) scale(${wobbleX.toFixed(3)}, ${wobbleY.toFixed(3)})`;
+
+  // Move small bubbles
+  smallBubbles.forEach(bubble => {
+    const speedMultiplier = 1 + nbass * 3;
+    bubble.x += Math.cos(bubble.angle) * bubble.speed * speedMultiplier;
+    bubble.y += Math.sin(bubble.angle) * bubble.speed * speedMultiplier;
+
+    // Bounce off edges
+    if (bubble.x < 0 || bubble.x > 100) {
+      bubble.angle = Math.PI - bubble.angle;
+      bubble.x = Math.max(0, Math.min(100, bubble.x));
+    }
+    if (bubble.y < 0 || bubble.y > 100) {
+      bubble.angle = -bubble.angle;
+      bubble.y = Math.max(0, Math.min(100, bubble.y));
+    }
+
+    // Random direction changes
+    if (Math.random() < 0.01) {
+      bubble.angle += (Math.random() - 0.5) * 0.5;
+    }
+
+    // Update position
+    bubble.element.style.left = `${bubble.x}%`;
+    bubble.element.style.top = `${bubble.y}%`;
+  });
+
+  requestAnimationFrame(move);
+}
+
+// Initialize small bubbles
+const smallBubbles = createSmallBubbles(50);
+
+// Handle window resize
+window.addEventListener('resize', () => {
+  smallBubbles.forEach(bubble => {
+    bubble.x = Math.min(100, Math.max(0, bubble.x));
+    bubble.y = Math.min(100, Math.max(0, bubble.y));
+  });
+});
+
+
 
   move();
 });

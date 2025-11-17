@@ -21,7 +21,7 @@
     <svg xmlns="http://www.w3.org/2000/svg">
       <defs>
         <filter id="goo">
-          <feGaussianBlur in="SourceGraphic" stdDeviation="15 35" result="blur" />
+          <feGaussianBlur in="SourceGraphic" stdDeviation="37 35" result="blur" />
           <feColorMatrix in="blur" mode="matrix" values="1 0 0 0 0  0 1 0 0 0  0 0 1 0 0  0 0 0 400 -180" result="goo" />
           <feBlend in="SourceGraphic" in2="goo" />
           <feDropShadow dx="0" dy="0" stdDeviation="900" flood-color="rgba(0,0,0,0.5)"/>
@@ -37,9 +37,6 @@
       <div class="g5"></div>
       <div class="interactive"></div>
     </div>
-  </div>
-  <div class="content">
-    <p>click</p>
   </div>
     <script type="module" src="main.ts"></script>
   </body>
